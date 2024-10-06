@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <script src="https://cdn.rawgit.com/supermedium/aframe-extras/master/dist/aframe-extras.min.js"></script>
+    <style>
+        /* Container for dropdown menus */
+        #catalogueContainer {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 999;
+            display: none; /* Hidden by default */
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 10px;
+            font-family: Arial, sans-serif;
+        }
+
+        #catalogueContainer select {
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            outline: none;
+            background-color: #FFF;
+            border: none;
+            color: black; /* Default color */
+        }
+
+        #catalogueContainer select.selected {
+            color: green; /* Change color when selected */
+        }
+
+        #catalogueContainer h3 {
+            color: #FFF;
+            margin: 0 10px 0 0;
+            font-size: 16px;
+        }
+
+        #buyNowContainer, #playPauseButtonContainer {
+            position: absolute;
+            bottom: 20px;
+            z-index: 999;
+            text-align: center;
+        }
+
+        #buyNowContainer {
+            left: 20px;
+            display: none; /* Hidden by default */
+        }
+
+        #playPauseButtonContainer {
+            right: 20px;
+            display: none; /* Hidden by default */
+        }
+
+        #buyNowButton, #playPauseButton {
+            padding: 10px 20px;
+            border-radius: 5px;
+            background-color: #FFD700;
+            color: #000;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            outline: none;
+            border: none;
+        }
+
+        .a-enter-vr-button {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Catalogue Selection UI -->
+    <div id="catalogueContainer">
+        <!-- Gold Jewelry -->
+        <div>
+            <h3>Gold Jewelry:</h3>
+            <select id="goldJewelrySelect">
+                <option value="">-- Select Gold Jewelry --</option>
+                <option value="ring">Ring</option>
+                <option value="necklace">Necklace</option>
+                <option value="earrings">Earrings</option>
+                <option value="bracelet">Bracelet</option>
+            </select>
+        </div>
+
+        <!-- Silver Jewelry -->
+        <div>
+            <h3>Silver Jewelry:</h3>
+            <select id="silverJewelrySelect">
+                <option value="">-- Select Silver Jewelry --</option>
+                <option value="ring">Silver Ring</option>
+                <option value="necklace">Silver Necklace</option>
+                <option value="earrings">Silver Earrings</option>
+                <option value="bracelet">Silver Bracelet</option>
+            </select>
+        </div>
+
+        <!-- Diamond Jewelry -->
+        <div>
+            <h3>Diamond Jewelry:</h3>
+            <select id="diamondJewelrySelect">
+                <option value="">-- Select Diamond Jewelry --</option>
+                <option value="ring">Diamond Ring</option>
+                <option value="necklace">Diamond Necklace</option>
+                <option value="earrings">Diamond Earrings</option>
+                <option value="bracelet">Diamond Bracelet</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Buy Now Button (hidden initially) -->
+    <div id="buyNowContainer">
+        <button id="buyNowButton">Buy Now</button>
+    </div>
+
+    <!-- Play/Pause Button (hidden initially) -->
+    <div id="playPauseButtonContainer">
+        <button id="playPauseButton">Play with Audio</button>
+    </div>
+
+    <!-- AR Scene -->
+    <a-scene
+        mindar-image="imageTargetSrc: ./targets.mind"
+        color-space="sRGB"
+        renderer="colorManagement: true, physicallyCorrectLights"
+        vr-mode-ui="enabled: false"
+        device-orientation-permission-ui="enabled: false">
+
+        <a-assets>
+            <video id="ringVideo" src="ring.mp4" playsinline loop></video>
+            <video id="necklaceVideo" src="necklace.mp4" playsinline loop></video>
+            <video id="earringsVideo" src="earrings.mp4" playsinline loop></video>
+            <video id="braceletVideo" src="bracelet.mp4" playsinline loop></video>
+        </a-assets>
+
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+        <!-- Single Target -->
+        <a-entity id="target1" mindar-image-target="targetIndex: 0">
+            <!-- Jewelry Video Display Entity (changes based on user selection) -->
+            <a-plane id="videoDisplay" position="0 0 0" height="0.59" width="1"></a-plane>
+            <!-- Confetti Effect -->
+            <a-entity id="confetti" particle-system="preset: fireworks; particleCount: 100; size: 1; color: #FF3D00; velocityValue: 0 1 0; velocitySpread: 1 1 0;"></a-entity>
+        </a-entity>
+    </a-scene>
+
+    <script>
+        const videoDisplay = document.querySelector('#videoDisplay');
+        const confetti = document.querySelector('#confetti');
+        const buyNowContainer = document.querySelector('#buyNowContainer');
+        const buyNowButton = document.querySelector('#buyNowButton');
+        const playPauseButton = document.querySelector('#playPauseButton');
+        const playPauseButtonContainer = document.querySelector('#playPauseButtonContainer');
+
+        // Jewelry videos
+        const ringVideo = document.querySelector('#ringVideo');
+        const necklaceVideo = document.querySelector('#necklaceVideo');
+        const earringsVideo = document.querySelector('#earringsVideo');
+        const braceletVideo = document.querySelector('#braceletVideo');
+
+        // Track current video and play state
+        let currentVideo = null;
+        let isPlaying = false;
+        let targetVisible = false;
+
+        // Dropdown elements
+        const goldJewelrySelect = document.querySelector('#goldJewelrySelect');
+        const silverJewelrySelect = document.querySelector('#silverJewelrySelect');
+        const diamondJewelrySelect = document.querySelector('#diamondJewelrySelect');
+
+        // Function to reset other dropdowns to default when one is selected
+        const resetOtherDropdowns = (currentSelect) => {
+            const allSelects = [goldJewelrySelect, silverJewelrySelect, diamondJewelrySelect];
+            allSelects.forEach(select => {
+                if (select !== currentSelect) {
+                    select.value = "";
+                    select.classList.remove('selected'); // Reset class of unselected dropdowns
+                }
+            });
+        };
+
+        // Function to update video and play/pause controls
+        const changeJewelryVideo = (videoElement, productLink) => {
+            if (currentVideo) {
+                currentVideo.pause();
+            }
+            currentVideo = videoElement;
+            videoDisplay.setAttribute('material', 'src', `#${videoElement.id}`);
+
+            // Show the Buy Now button with the respective product link
+            buyNowContainer.style.display = 'block';
+            buyNowButton.onclick = () => {
+                window.open(productLink, '_blank');
+            };
+
+            // Show Play/Pause button
+            playPauseButtonContainer.style.display = 'block';
+            playPauseButton.textContent = 'Play with Audio'; // Updated text
+        };
+
+        // Change the color of the dropdown text to green when selected
+        const changeSelectedDropdownColor = (selectElement) => {
+            if (selectElement.value !== "") {
+                selectElement.classList.add('selected'); // Add class to change text color
+            }
+        };
+
+        // Event listeners for each dropdown
+        goldJewelrySelect.addEventListener('change', (event) => {
+            resetOtherDropdowns(goldJewelrySelect);  // Reset other dropdowns
+            changeSelectedDropdownColor(goldJewelrySelect); // Change text color
+
+            switch (event.target.value) {
+                case 'ring':
+                    changeJewelryVideo(ringVideo, 'https://www.bluestone.com/jewellery/rings.html');
+                    break;
+                case 'necklace':
+                    changeJewelryVideo(necklaceVideo, 'https://www.bluestone.com/jewellery/necklaces.html');
+                    break;
+                case 'earrings':
+                    changeJewelryVideo(earringsVideo, 'https://www.bluestone.com/jewellery/earrings.html');
+                    break;
+                case 'bracelet':
+                    changeJewelryVideo(braceletVideo, 'https://www.bluestone.com/jewellery/bangles.html');
+                    break;
+                default:
+                    break;
+            }
+        });
+
+        silverJewelrySelect.addEventListener('change', (event) => {
+            resetOtherDropdowns(silverJewelrySelect);  // Reset other dropdowns
+            changeSelectedDropdownColor(silverJewelrySelect); // Change text color
+
+            switch (event.target.value) {
+                case 'ring':
+                    changeJewelryVideo(ringVideo, 'https://example.com/silver-rings');
+                    break;
+                case 'necklace':
+                    changeJewelryVideo(necklaceVideo, 'https://example.com/silver-necklaces');
+                    break;
+                case 'earrings':
+                    changeJewelryVideo(earringsVideo, 'https://example.com/silver-earrings');
+                    break;
+                case 'bracelet':
+                    changeJewelryVideo(braceletVideo, 'https://example.com/silver-bracelets');
+                    break;
+                default:
+                    break;
+            }
+        });
+
+        diamondJewelrySelect.addEventListener('change', (event) => {
+            resetOtherDropdowns(diamondJewelrySelect);  // Reset other dropdowns
+            changeSelectedDropdownColor(diamondJewelrySelect); // Change text color
+
+            switch (event.target.value) {
+                case 'ring':
+                    changeJewelryVideo(ringVideo, 'https://example.com/diamond-rings');
+                    break;
+                case 'necklace':
+                    changeJewelryVideo(necklaceVideo, 'https://example.com/diamond-necklaces');
+                    break;
+                case 'earrings':
+                    changeJewelryVideo(earringsVideo, 'https://example.com/diamond-earrings');
+                    break;
+                case 'bracelet':
+                    changeJewelryVideo(braceletVideo, 'https://example.com/diamond-bracelets');
+                    break;
+                default:
+                    break;
+            }
+        });
+
+        // Play/Pause functionality
+        playPauseButton.addEventListener('click', () => {
+            if (currentVideo && targetVisible) {
+                if (isPlaying) {
+                    currentVideo.pause();
+                    playPauseButton.textContent = 'Play with Audio'; // Show Play when paused
+                } else {
+                    currentVideo.play();
+                    playPauseButton.textContent = 'Pause'; // Show Pause when playing
+                }
+                isPlaying = !isPlaying; // Toggle the play state
+            }
+        });
+
+        // Handle target found and lost events
+        const target1 = document.querySelector('#target1');
+
+        target1.addEventListener('targetFound', () => {
+            targetVisible = true;
+            // Show the dropdown menu only when the target is found
+            document.querySelector('#catalogueContainer').style.display = 'flex';
+
+            // Show the Buy Now button
+            buyNowContainer.style.display = 'block'; 
+            playPauseButtonContainer.style.display = 'block'; // Show Play/Pause button
+
+            if (!isPlaying) {
+                playPauseButton.textContent = 'Play with Audio'; // Updated text
+            }
+        });
+
+        target1.addEventListener('targetLost', () => {
+            targetVisible = false;
+            // Hide the dropdown menu when the target is lost
+            document.querySelector('#catalogueContainer').style.display = 'none';
+            buyNowContainer.style.display = 'none'; // Hide Buy Now button
+            playPauseButtonContainer.style.display = 'none'; // Hide Play/Pause button
+
+            if (currentVideo) {
+                currentVideo.pause();
+            }
+            isPlaying = false;
+            playPauseButton.textContent = 'Play with Audio'; // Reset text when target lost
+        });
+    </script>
+</body>
+</html>
