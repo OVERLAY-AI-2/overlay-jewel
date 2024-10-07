@@ -4,7 +4,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-    <script src="https://cdn.rawgit.com/supermedium/aframe-extras/master/dist/aframe-extras.min.js"></script>
     <style>
         /* Container for dropdown menus */
         #catalogueContainer {
@@ -73,25 +72,12 @@
             border: none;
         }
 
-        /* Logo styling */
-        #logo {
-            position: absolute;
-            top: 20px; /* Adjust as necessary */
-            left: 20px; /* Adjust as necessary */
-            z-index: 1000; /* Ensure logo is above other elements */
-            width: 100px; /* Set the width of the logo */
-            height: auto; /* Maintain aspect ratio */
-        }
-
         .a-enter-vr-button {
             display: none !important;
         }
     </style>
 </head>
 <body>
-    <!-- Logo -->
-    <img id="logo" src="4k.png" alt="Logo" />
-
     <!-- Catalogue Selection UI -->
     <div id="catalogueContainer">
         <!-- Gold Jewelry -->
@@ -149,22 +135,25 @@
             <video id="diamondNecklaceVideo" src="diamond_necklace.mp4" playsinline loop></video>
             <video id="diamondEarringsVideo" src="diamond_earrings.mp4" playsinline loop></video>
             <video id="diamondBraceletVideo" src="diamond_bracelet.mp4" playsinline loop></video>
+
+            <!-- Logo Image -->
+            <img id="logoImage" src="4k.png" />
         </a-assets>
 
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
         <!-- Single Target -->
         <a-entity id="target1" mindar-image-target="targetIndex: 0">
+            <!-- Logo to appear just on top of the target -->
+            <a-image src="#logoImage" position="0 0.8 0" width="1" height="1"></a-image>
+
             <!-- Jewelry Video Display Entity (changes based on user selection) -->
             <a-plane id="videoDisplay" position="0 0 0" height="0.59" width="1"></a-plane>
-            <!-- Confetti Effect -->
-            <a-entity id="confetti" particle-system="preset: fireworks; particleCount: 100; size: 1; color: #FF3D00; velocityValue: 0 1 0; velocitySpread: 1 1 0;"></a-entity>
         </a-entity>
     </a-scene>
 
     <script>
         const videoDisplay = document.querySelector('#videoDisplay');
-        const confetti = document.querySelector('#confetti');
         const buyNowContainer = document.querySelector('#buyNowContainer');
         const buyNowButton = document.querySelector('#buyNowButton');
         const playPauseButton = document.querySelector('#playPauseButton');
