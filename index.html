@@ -73,12 +73,25 @@
             border: none;
         }
 
+        /* Logo styling */
+        #logo {
+            position: absolute;
+            top: 20px; /* Adjust as necessary */
+            left: 20px; /* Adjust as necessary */
+            z-index: 1000; /* Ensure logo is above other elements */
+            width: 100px; /* Set the width of the logo */
+            height: auto; /* Maintain aspect ratio */
+        }
+
         .a-enter-vr-button {
             display: none !important;
         }
     </style>
 </head>
 <body>
+    <!-- Logo -->
+    <img id="logo" src="4k.png" alt="Logo" />
+
     <!-- Catalogue Selection UI -->
     <div id="catalogueContainer">
         <!-- Gold Jewelry -->
@@ -92,7 +105,7 @@
                 <option value="bracelet">Gold Bracelet</option>
             </select>
         </div>
-<br>.</br>
+        <br>.</br>
         <!-- Diamond Jewelry -->
         <div>
             <h3>Diamond<br>Jewellery:</h3>
@@ -125,10 +138,17 @@
         device-orientation-permission-ui="enabled: false">
 
         <a-assets>
-            <video id="ringVideo" src="ring.mp4" playsinline loop></video>
-            <video id="necklaceVideo" src="necklace.mp4" playsinline loop></video>
-            <video id="earringsVideo" src="earrings.mp4" playsinline loop></video>
-            <video id="braceletVideo" src="bracelet.mp4" playsinline loop></video>
+            <!-- Gold Jewelry Videos -->
+            <video id="goldRingVideo" src="gold_ring.mp4" playsinline loop></video>
+            <video id="goldNecklaceVideo" src="gold_necklace.mp4" playsinline loop></video>
+            <video id="goldEarringsVideo" src="gold_earrings.mp4" playsinline loop></video>
+            <video id="goldBraceletVideo" src="gold_bracelet.mp4" playsinline loop></video>
+
+            <!-- Diamond Jewelry Videos -->
+            <video id="diamondRingVideo" src="diamond_ring.mp4" playsinline loop></video>
+            <video id="diamondNecklaceVideo" src="diamond_necklace.mp4" playsinline loop></video>
+            <video id="diamondEarringsVideo" src="diamond_earrings.mp4" playsinline loop></video>
+            <video id="diamondBraceletVideo" src="diamond_bracelet.mp4" playsinline loop></video>
         </a-assets>
 
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
@@ -151,12 +171,6 @@
         const playPauseButtonContainer = document.querySelector('#playPauseButtonContainer');
 
         // Jewelry videos
-        const ringVideo = document.querySelector('#ringVideo');
-        const necklaceVideo = document.querySelector('#necklaceVideo');
-        const earringsVideo = document.querySelector('#earringsVideo');
-        const braceletVideo = document.querySelector('#braceletVideo');
-
-        // Track current video and play state
         let currentVideo = null;
         let isPlaying = false;
         let targetVisible = false;
@@ -209,16 +223,16 @@
 
             switch (event.target.value) {
                 case 'ring':
-                    changeJewelryVideo(ringVideo, 'https://www.bluestone.com/jewellery/rings.html');
+                    changeJewelryVideo(document.querySelector('#goldRingVideo'), 'https://www.bluestone.com/jewellery/rings.html');
                     break;
                 case 'necklace':
-                    changeJewelryVideo(necklaceVideo, 'https://www.bluestone.com/jewellery/necklaces.html');
+                    changeJewelryVideo(document.querySelector('#goldNecklaceVideo'), 'https://www.bluestone.com/jewellery/necklaces.html');
                     break;
                 case 'earrings':
-                    changeJewelryVideo(earringsVideo, 'https://www.bluestone.com/jewellery/earrings.html');
+                    changeJewelryVideo(document.querySelector('#goldEarringsVideo'), 'https://www.bluestone.com/jewellery/earrings.html');
                     break;
                 case 'bracelet':
-                    changeJewelryVideo(braceletVideo, 'https://www.bluestone.com/jewellery/bangles.html');
+                    changeJewelryVideo(document.querySelector('#goldBraceletVideo'), 'https://www.bluestone.com/jewellery/bangles.html');
                     break;
                 default:
                     break;
@@ -231,16 +245,16 @@
 
             switch (event.target.value) {
                 case 'ring':
-                    changeJewelryVideo(ringVideo, 'https://example.com/diamond-rings');
+                    changeJewelryVideo(document.querySelector('#diamondRingVideo'), 'https://example.com/diamond-rings');
                     break;
                 case 'necklace':
-                    changeJewelryVideo(necklaceVideo, 'https://example.com/diamond-necklaces');
+                    changeJewelryVideo(document.querySelector('#diamondNecklaceVideo'), 'https://example.com/diamond-necklaces');
                     break;
                 case 'earrings':
-                    changeJewelryVideo(earringsVideo, 'https://example.com/diamond-earrings');
+                    changeJewelryVideo(document.querySelector('#diamondEarringsVideo'), 'https://example.com/diamond-earrings');
                     break;
                 case 'bracelet':
-                    changeJewelryVideo(braceletVideo, 'https://example.com/diamond-bracelets');
+                    changeJewelryVideo(document.querySelector('#diamondBraceletVideo'), 'https://example.com/diamond-bracelets');
                     break;
                 default:
                     break;
